@@ -1,0 +1,66 @@
+name: Build Wave Music APK
+
+# Builds the Flutter example app in example/music_streaming_app into a
+# release APK. Trigger manually from the Actions tab (or via `gh workflow run`).
+on:
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: example/music_streaming_app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Scaffold Android platform around the app sources
+        run: |
+          set -e
+          mkdir -p /tmp/app_backup
+          cp -r lib /tmp/app_backup/lib
+          cp -r test /tmp/app_backup/test
+          cp pubspec.yaml analysis_options.yaml /tmp/app_backup/
+          cp android/app/src/main/AndroidManifest.xml /tmp/app_backup/
+          cp android/app/src/main/kotlin/com/example/music_streaming_app/MainActivity.kt /tmp/app_backup/
+          flutter create --platforms=android --project-name music_streaming_app --org com.example .
+          rm -rf lib test
+          cp -r /tmp/app_backup/lib lib
+          cp -r /tmp/app_backup/test test
+          cp /tmp/app_backup/pubspec.yaml /tmp/app_backup/analysis_options.yaml .
+          cp /tmp/app_backup/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+          mkdir -p android/app/src/main/kotlin/com/example/music_streaming_app
+          cp /tmp/app_backup/MainActivity.kt android/app/src/main/kotlin/com/example/music_streaming_app/MainActivity.kt
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze (non-blocking)
+        continue-on-error: true
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Build release APK (split per ABI)
+        run: flutter build apk --release --split-per-abi
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: wave-music-release-apk
+          path: example/music_streaming_app/build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: error
