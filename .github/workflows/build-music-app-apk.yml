@@ -1,9 +1,16 @@
 name: Build Wave Music APK
 
 # Builds the Flutter example app in example/music_streaming_app into a
-# release APK. Trigger manually from the Actions tab (or via `gh workflow run`).
+# release APK. Runs on pushes to the app branch (and can be dispatched
+# manually once this workflow lands on the default branch).
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - arena/603a5ca0-youtube-explode-dart
+    paths:
+      - 'example/music_streaming_app/**'
+      - '.github/workflows/build-music-app-apk.yml'
 
 jobs:
   build-apk:
