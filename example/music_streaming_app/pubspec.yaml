@@ -1,0 +1,30 @@
+name: music_streaming_app
+description: Offline-capable music streaming and downloader app powered by youtube_explode_dart.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.0
+  flutter: '>=3.27.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Local copy of the library in THIS repository (two levels up from here).
+  # When you copy this app out of the repo, replace this with the pub.dev
+  # version instead:  youtube_explode_dart: ^3.1.0
+  youtube_explode_dart:
+    path: ../../
+  just_audio: ^0.10.5
+  audio_service: ^0.18.18
+  audio_session: ^0.1.21
+  path_provider: ^2.1.5
+  shared_preferences: ^2.5.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
